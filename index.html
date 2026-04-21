@@ -2,7 +2,6 @@
 <html>
 <head>
   <title>AI ระบบคำนวณ</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -77,7 +76,7 @@
 17/6/2566 389299 ลาวพัฒนา"></textarea>
 
 <button onclick="analyze()">วิเคราะห์</button>
-<button class="reset-btn" onclick="resetAll()">🔄 Reset ทั้งหมด</button>
+<button class="reset-btn" onclick="resetAll()">🔄 Reset</button>
 
 <div id="detail" class="detail"></div>
 
@@ -147,7 +146,6 @@ function analyze(){
     }
   });
 
-  // รวมสถิติเดิม
   let old = loadStat();
   digits = digits.concat(old);
 
@@ -158,18 +156,18 @@ function analyze(){
 
   let top = topN(counter,3);
 
-  let p2={},p3={},p5={},p6={};
+  let p3={},p4={},p5={},p6={};
 
   for(let i=0;i<digits.length;i++){
-
-    if(i<=digits.length-2){
-      let v=digits[i]+digits[i+1];
-      if(!isRepeat(v)) p2[v]=(p2[v]||0)+1;
-    }
 
     if(i<=digits.length-3){
       let v=digits[i]+digits[i+1]+digits[i+2];
       if(!isRepeat(v)) p3[v]=(p3[v]||0)+1;
+    }
+
+    if(i<=digits.length-4){
+      let v=digits.slice(i,i+4).join("");
+      if(!isRepeat(v)) p4[v]=(p4[v]||0)+1;
     }
 
     if(i<=digits.length-5){
@@ -183,13 +181,12 @@ function analyze(){
     }
   }
 
-  // save
   saveStat(digits);
 
   let text="🔥 เลขเด่น:\n"+top.join(" ")+"\n\n";
 
-  text+="📌 2 ตัว:\n"+topN(p2,8).join(" • ")+"\n\n";
   text+="📌 3 ตัว:\n"+topN(p3,6).join(" • ")+"\n\n";
+  text+="📌 4 ตัว:\n"+topN(p4,5).join(" • ")+"\n\n";
   text+="📌 5 ตัว:\n"+topN(p5,5).join(" • ")+"\n\n";
   text+="📌 6 ตัว:\n"+topN(p6,3).join(" • ");
 
