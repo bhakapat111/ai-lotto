@@ -119,7 +119,6 @@
   <option value="นิเคอิVIP">นิเคอิVIP</option>
 </select>
 
-<textarea id="input" placeholder="ใส่ 10 วัน คั่นด้วย ,"></textarea>
 
 <button onclick="analyze()">วิเคราะห์</button>
 
@@ -197,10 +196,6 @@ function analyze(){
     let input=document.getElementById("input").value;
 
     let days=input.split(",").filter(x=>x.trim()!=="");
-
-    if(days.length<10 && !isAdmin){
-        alert("ต้องใส่ครบ 10 วัน");
-        return;
     }
 
     let digits=[];
