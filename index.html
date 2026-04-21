@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: Arial;
-      background:#eef2f7;
+      background: linear-gradient(135deg,#4facfe,#00f2fe);
       text-align:center;
       padding:20px;
     }
@@ -17,15 +17,16 @@
       padding:20px;
       width:520px;
       margin:auto;
-      border-radius:12px;
-      box-shadow:0 5px 15px rgba(0,0,0,0.1);
+      border-radius:16px;
+      box-shadow:0 10px 25px rgba(0,0,0,0.15);
     }
 
-    textarea {
+    textarea, select {
       width:100%;
       padding:10px;
       margin-top:10px;
-      height:150px;
+      border-radius:8px;
+      border:1px solid #ddd;
     }
 
     button {
@@ -35,36 +36,25 @@
       background:#007bff;
       color:white;
       border:none;
-      border-radius:6px;
+      border-radius:8px;
+      font-weight:bold;
     }
 
-    .reset-btn {
-      background:#dc3545;
-    }
+    .reset-btn { background:#dc3545; }
 
     .detail {
       margin-top:15px;
       text-align:left;
       background:#f7f7f7;
       padding:10px;
-      border-radius:8px;
+      border-radius:10px;
       white-space:pre-line;
       font-size:14px;
     }
 
     .date {
-      font-size:18px;
+      font-size:16px;
       margin-bottom:10px;
-    }
-
-    select {
-      width:100%;
-      padding:8px;
-      margin-bottom:10px;
-    }
-
-    @media (max-width:600px){
-      .box{width:95%;}
     }
   </style>
 </head>
@@ -73,47 +63,67 @@
 
 <div class="box">
 
-<h2>สูตรคำนวณ AI</h2>
+<h2>🤖 AI วิเคราะห์เลข</h2>
 
+<!-- ✅ ประเภทหวย (ครบทั้งหมด + เพิ่มแล้ว) -->
 <select id="type">
   <optgroup label="🇹🇭 หวยไทย">
     <option value="gov">รัฐบาล</option>
     <option value="baac">ธกส.</option>
     <option value="gsb">ออมสิน</option>
+    <option value="thai_extra">ไทยพิเศษ</option>
+    <option value="thai_vip">ไทย VIP</option>
   </optgroup>
 
   <optgroup label="🌏 หวยต่างประเทศ / ออนไลน์">
     <option value="noivip">นอยวี (ฮานอย VIP)</option>
     <option value="han">ฮานอย</option>
     <option value="han_special">ฮานอยพิเศษ</option>
+    <option value="han_vip">ฮานอย VIP</option>
     <option value="lao">ลาวพัฒนา</option>
     <option value="laostar">ลาวสตาร์</option>
     <option value="laovip">ลาว VIP</option>
     <option value="laoextra">ลาว Extra</option>
+    <option value="lao_special">ลาวพิเศษ</option>
     <option value="malay">มาเลย์</option>
+    <option value="malay_vip">มาเลย์ VIP</option>
     <option value="sg">สิงคโปร์</option>
+    <option value="sg_vip">สิงคโปร์ VIP</option>
   </optgroup>
 
   <optgroup label="➕ แบบย่อย (บางเว็บแยก)">
     <option value="noi">นอยธรรมดา</option>
     <option value="noi_special">นอยพิเศษ</option>
     <option value="noi_vip">นอย VIP</option>
+    <option value="noi_hd">นอย HD</option>
+    <option value="noi_tv">นอย TV</option>
+
     <option value="laotv">ลาว TV</option>
     <option value="laohd">ลาว HD</option>
     <option value="lao_old">ลาวย้อนหลัง</option>
+    <option value="lao_vip_tv">ลาว VIP TV</option>
+
     <option value="hantv">ฮานอย TV</option>
     <option value="hanhd">ฮานอย HD</option>
+    <option value="han_vip_tv">ฮานอย VIP TV</option>
   </optgroup>
+</select>
+
+<!-- ✅ เวลา -->
+<select id="time">
+  <option value="morning">🌅 เช้า</option>
+  <option value="afternoon">☀️ บ่าย</option>
+  <option value="evening">🌙 เย็น</option>
 </select>
 
 <div class="date" id="today"></div>
 
 <textarea id="input" placeholder="ใส่ข้อมูล เช่น:
-16/6/2566 363820 ลาวพัฒนา
-17/6/2566 389299 ลาวพัฒนา"></textarea>
+16/6/2566 363820
+17/6/2566 389299"></textarea>
 
 <button onclick="analyze()">วิเคราะห์</button>
-<button class="reset-btn" onclick="resetAll()">🔄 Reset ทั้งหมด</button>
+<button class="reset-btn" onclick="resetAll()">ล้างทั้งหมด</button>
 
 <div id="detail" class="detail"></div>
 
@@ -121,86 +131,89 @@
 
 <script>
 
-// วันที่
+// 📅 วันที่
 function showToday(){
   const d = new Date();
-  const days = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
-  const months = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
-  let text = "วัน"+days[d.getDay()]+" ที่ "+d.getDate()+" เดือน "+months[d.getMonth()]+" พ.ศ. "+(d.getFullYear()+543);
-  document.getElementById("today").innerText = text;
+  document.getElementById("today").innerText = d.toLocaleDateString("th-TH");
 }
 showToday();
 
-// กรองเลขเบิ้ล
+// ❌ กรองเลขเบิ้ล
 function isRepeat(num){
   return /^(\d)\1+$/.test(num);
 }
 
-// key แยกประเภท
+// 🔑 key = type + time
 function getKey(){
-  let t = document.getElementById("type").value;
-  return "lottoStat_"+t;
+  return "lotto_"+type.value+"_"+time.value;
 }
 
-// save
-function saveStat(data){
-  let key = getKey();
-  let old = JSON.parse(localStorage.getItem(key) || "[]");
-  old.push(...data);
-  localStorage.setItem(key, JSON.stringify(old));
+// 🤖 auto เวลา
+function autoTime(){
+  let h = new Date().getHours();
+  if(h<12) time.value="morning";
+  else if(h<17) time.value="afternoon";
+  else time.value="evening";
 }
 
-// load
-function loadStat(){
-  let key = getKey();
-  return JSON.parse(localStorage.getItem(key) || "[]");
+// 🤖 auto ประเภท
+function autoType(){
+  let d = new Date().getDay();
+  if(d==1||d==4) type.value="gov";
+  else if(d==2||d==5) type.value="lao";
+  else type.value="han";
 }
 
-// top
+// 💾 จำค่า
+function saveSetting(){
+  localStorage.setItem("type", type.value);
+  localStorage.setItem("time", time.value);
+}
+
+function loadSetting(){
+  if(localStorage.type) type.value=localStorage.type;
+  if(localStorage.time) time.value=localStorage.time;
+}
+
+window.onload=function(){
+  loadSetting();
+  autoTime();
+  autoType();
+};
+
+type.onchange=saveSetting;
+time.onchange=saveSetting;
+
+// 🔥 top
 function topN(obj,n){
   return Object.entries(obj)
     .sort((a,b)=>b[1]-a[1])
-    .map(x=>x[0])
-    .filter(x=>!isRepeat(x))
+    .filter(x=>!isRepeat(x[0]))
     .slice(0,n);
 }
 
-// วิเคราะห์
+// 🤖 analyze
 function analyze(){
 
   let input = document.getElementById("input").value;
-  if(!input.trim()){
-    alert("กรอกข้อมูลก่อน");
-    return;
-  }
-
-  let numbers = input.match(/\d+/g);
-  if(!numbers){
-    alert("ไม่พบตัวเลข");
-    return;
-  }
+  let nums = input.match(/\d+/g);
+  if(!nums){ alert("ไม่มีตัวเลข"); return; }
 
   let digits=[];
-  numbers.forEach(n=>{
-    for(let c of n){ digits.push(c); }
-  });
+  nums.forEach(n=>digits.push(...n.split("")));
 
-  let old = loadStat();
+  let old = JSON.parse(localStorage.getItem(getKey())||"[]");
   digits = digits.concat(old);
 
-  let counter={};
-  digits.forEach(d=>{
-    counter[d]=(counter[d]||0)+1;
-  });
-
-  let top = topN(counter,3);
+  let count={};
+  digits.forEach(d=>count[d]=(count[d]||0)+1);
 
   let p3={},p4={},p5={},p6={};
 
   for(let i=0;i<digits.length;i++){
 
     if(i<=digits.length-3){
-      let v=digits[i]+digits[i+1]+digits[i+2];
+      let v=digits.slice(i,i+3).join("");
       if(!isRepeat(v)) p3[v]=(p3[v]||0)+1;
     }
 
@@ -220,24 +233,27 @@ function analyze(){
     }
   }
 
-  saveStat(digits);
+  localStorage.setItem(getKey(), JSON.stringify(digits));
 
-  let text="🔥 เลขเด่น:\n"+top.join(" ")+"\n\n";
-  text+="📌 3 ตัว:\n"+topN(p3,6).join(" • ")+"\n\n";
-  text+="📌 4 ตัว:\n"+topN(p4,6).join(" • ")+"\n\n";
-  text+="📌 5 ตัว:\n"+topN(p5,5).join(" • ")+"\n\n";
-  text+="📌 6 ตัว:\n"+topN(p6,3).join(" • ");
+  let typeName = type.selectedOptions[0].text;
+  let timeName = time.selectedOptions[0].text;
+
+  let text = "📊 "+typeName+" | "+timeName+"\n\n";
+
+  text += "🔥 เลขเด่น:\n"+topN(count,3).map(x=>x[0]).join(" ")+"\n\n";
+  text += "📌 3 ตัว:\n"+topN(p3,6).map(x=>x[0]).join(" • ")+"\n\n";
+  text += "📌 4 ตัว:\n"+topN(p4,6).map(x=>x[0]).join(" • ")+"\n\n";
+  text += "📌 5 ตัว:\n"+topN(p5,5).map(x=>x[0]).join(" • ")+"\n\n";
+  text += "📌 6 ตัว:\n"+topN(p6,3).map(x=>x[0]).join(" • ");
 
   document.getElementById("detail").innerText=text;
 }
 
-// reset
+// 🔄 reset
 function resetAll(){
-  if(confirm("ล้างข้อมูลทั้งหมด?")){
-    document.getElementById("input").value="";
-    document.getElementById("detail").innerText="";
-    localStorage.removeItem(getKey());
-    alert("ล้างเรียบร้อย");
+  if(confirm("ล้างทั้งหมด?")){
+    localStorage.clear();
+    location.reload();
   }
 }
 
