@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>AI ระบบคำนวณ</title>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -21,12 +22,13 @@
       box-shadow:0 5px 15px rgba(0,0,0,0.1);
     }
 
-    textarea {
+    textarea, input {
       width:100%;
       padding:10px;
       margin-top:10px;
-      height:150px;
     }
+
+    textarea { height:150px; }
 
     button {
       margin-top:10px;
@@ -38,10 +40,6 @@
       border-radius:6px;
     }
 
-    .reset-btn {
-      background:#dc3545;
-    }
-
     .detail {
       margin-top:15px;
       text-align:left;
@@ -49,12 +47,7 @@
       padding:10px;
       border-radius:8px;
       white-space:pre-line;
-      font-size:14px;
-    }
-
-    .date {
-      font-size:18px;
-      margin-bottom:10px;
+      font-size:13px;
     }
 
     @media (max-width:600px){
@@ -67,16 +60,16 @@
 
 <div class="box">
 
-<h2>สูตรคำนวณ AI</h2>
+<h2>📊 สูตรคำนวณ AI</h2>
 
-<div class="date" id="today"></div>
+<input type="text" id="today" placeholder="วันนี้ เช่น 21/04/2569">
 
-<textarea id="input" placeholder="ใส่ข้อมูล เช่น:
-16/6/2566 363820 ลาวพัฒนา
-17/6/2566 389299 ลาวพัฒนา"></textarea>
+<textarea id="input" placeholder="ใส่ข้อมูล เช่น
+16/6/2566 363820
+17/6/2566 389299"></textarea>
 
 <button onclick="analyze()">วิเคราะห์</button>
-<button class="reset-btn" onclick="resetAll()">🔄 Reset</button>
+<button onclick="resetData()">🔄 Reset</button>
 
 <div id="detail" class="detail"></div>
 
@@ -84,123 +77,103 @@
 
 <script>
 
-// 📅 วันที่ไทย
-function showToday(){
-  const d = new Date();
-  const days = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
-  const months = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
-
-  let text = "วัน"+days[d.getDay()]+" ที่ "+d.getDate()+" เดือน "+months[d.getMonth()]+" พ.ศ. "+(d.getFullYear()+543);
-  document.getElementById("today").innerText = text;
-}
-showToday();
-
-// ❌ กรองเลขเบิ้ล
+// 🔥 กรองเลขเบิ้ล
 function isRepeat(num){
   return /^(\d)\1+$/.test(num);
-}
-
-// 📊 save
-function saveStat(data){
-  let old = JSON.parse(localStorage.getItem("lottoStat") || "[]");
-  old.push(...data);
-  localStorage.setItem("lottoStat", JSON.stringify(old));
-}
-
-// 📊 load
-function loadStat(){
-  return JSON.parse(localStorage.getItem("lottoStat") || "[]");
 }
 
 // 🔥 top
 function topN(obj,n){
   return Object.entries(obj)
-    .sort((a,b)=>b[1]-a[1])
-    .map(x=>x[0])
-    .filter(x=>!isRepeat(x))
-    .slice(0,n);
+  .sort((a,b)=>b[1]-a[1])
+  .map(x=>x[0])
+  .filter(x=>!isRepeat(x))
+  .slice(0,n);
+}
+
+// 🔄 reset
+function resetData(){
+  document.getElementById("input").value="";
+  document.getElementById("detail").innerText="";
 }
 
 // 🤖 analyze
 function analyze(){
 
+  let today = document.getElementById("today").value;
   let input = document.getElementById("input").value;
 
-  if(!input.trim()){
-    alert("กรอกข้อมูลก่อน");
+  if(!today){
+    alert("ใส่วันที่วันนี้ก่อน");
     return;
   }
 
-  let numbers = input.match(/\d+/g);
+  let lines = input.split("\n").filter(x=>x.trim()!="");
 
-  if(!numbers){
-    alert("ไม่พบตัวเลข");
-    return;
+  let numbers=[];
+
+  for(let l of lines){
+    let match = l.match(/\d{6}/);
+    if(match) numbers.push(match[0]);
   }
 
   let digits=[];
 
-  numbers.forEach(n=>{
-    for(let c of n){
-      digits.push(c);
+  for(let n of numbers){
+    for(let d of n){
+      digits.push(d);
     }
-  });
+  }
 
-  let old = loadStat();
-  digits = digits.concat(old);
-
+  // 🔥 สถิติ
   let counter={};
-  digits.forEach(d=>{
+  for(let d of digits){
     counter[d]=(counter[d]||0)+1;
-  });
+  }
 
   let top = topN(counter,3);
 
+  // 📌 pattern
   let p3={},p4={},p5={},p6={};
 
-  for(let i=0;i<digits.length;i++){
+  for(let n of numbers){
 
-    if(i<=digits.length-3){
-      let v=digits[i]+digits[i+1]+digits[i+2];
-      if(!isRepeat(v)) p3[v]=(p3[v]||0)+1;
-    }
+    for(let i=0;i<n.length;i++){
 
-    if(i<=digits.length-4){
-      let v=digits.slice(i,i+4).join("");
-      if(!isRepeat(v)) p4[v]=(p4[v]||0)+1;
-    }
+      if(i<=n.length-3){
+        let s=n.substring(i,i+3);
+        p3[s]=(p3[s]||0)+1;
+      }
 
-    if(i<=digits.length-5){
-      let v=digits.slice(i,i+5).join("");
-      if(!isRepeat(v)) p5[v]=(p5[v]||0)+1;
-    }
+      if(i<=n.length-4){
+        let s=n.substring(i,i+4);
+        p4[s]=(p4[s]||0)+1;
+      }
 
-    if(i<=digits.length-6){
-      let v=digits.slice(i,i+6).join("");
-      if(!isRepeat(v)) p6[v]=(p6[v]||0)+1;
+      if(i<=n.length-5){
+        let s=n.substring(i,i+5);
+        p5[s]=(p5[s]||0)+1;
+      }
+
+      if(i<=n.length-6){
+        let s=n.substring(i,i+6);
+        p6[s]=(p6[s]||0)+1;
+      }
+
     }
   }
 
-  saveStat(digits);
+  let text="📅 วันนี้: "+today+"\n\n";
 
-  let text="🔥 เลขเด่น:\n"+top.join(" ")+"\n\n";
+  text+="🔥 เลขเด่น:\n";
+  text+=top.join(" ")+"\n\n";
 
   text+="📌 3 ตัว:\n"+topN(p3,6).join(" • ")+"\n\n";
   text+="📌 4 ตัว:\n"+topN(p4,5).join(" • ")+"\n\n";
-  text+="📌 5 ตัว:\n"+topN(p5,5).join(" • ")+"\n\n";
-  text+="📌 6 ตัว:\n"+topN(p6,3).join(" • ");
+  text+="📌 5 ตัว:\n"+topN(p5,4).join(" • ")+"\n\n";
+  text+="📌 6 ตัว:\n"+topN(p6,3).join(" • ")+"\n\n";
 
   document.getElementById("detail").innerText=text;
-}
-
-// 🔄 reset
-function resetAll(){
-  if(confirm("ล้างข้อมูลทั้งหมด?")){
-    document.getElementById("input").value="";
-    document.getElementById("detail").innerText="";
-    localStorage.removeItem("lottoStat");
-    alert("ล้างเรียบร้อย");
-  }
 }
 
 </script>
