@@ -136,11 +136,13 @@
 
 <script>
 
-// 📅 วันที่
+// วันที่
 function showToday(){
   const d = new Date();
-  document.getElementById("today").innerText =
-    d.toLocaleDateString("th-TH",{dateStyle:"full"});
+  const days = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
+  const months = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+  let text = "วัน"+days[d.getDay()]+" ที่ "+d.getDate()+" เดือน "+months[d.getMonth()]+" พ.ศ. "+(d.getFullYear()+543);
+  document.getElementById("today").innerText = text;
 }
 showToday();
 
