@@ -85,7 +85,7 @@
 
 <script>
 
-// 📅 วันที่ไทย
+// 📅 วันที่ไทย (ห้ามแก้ตามที่คุณสั่ง)
 function showToday(){
   const d = new Date();
   const days = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
@@ -139,17 +139,11 @@ function analyze(){
     return;
   }
 
-  let digits=[];
+  let digits = [];
 
   numbers.forEach(n=>{
-    for(let c of n){
-      digits.push(c);
-    }
+    digits.push(...n.split(""));
   });
-
-  // รวมสถิติเดิม
-  let old = loadStat();
-  digits = digits.concat(old);
 
   let counter={};
   digits.forEach(d=>{
@@ -158,38 +152,48 @@ function analyze(){
 
   let top = topN(counter,3);
 
-  let p2={},p3={},p5={},p6={};
+  let p2={}, p3={}, p4={}, p5={}, p6={};
 
   for(let i=0;i<digits.length;i++){
 
+    // 2 ตัว
     if(i<=digits.length-2){
       let v=digits[i]+digits[i+1];
       if(!isRepeat(v)) p2[v]=(p2[v]||0)+1;
     }
 
+    // 3 ตัว
     if(i<=digits.length-3){
       let v=digits[i]+digits[i+1]+digits[i+2];
       if(!isRepeat(v)) p3[v]=(p3[v]||0)+1;
     }
 
+    // 4 ตัว ✅ (เพิ่มให้แล้ว)
+    if(i<=digits.length-4){
+      let v=digits[i]+digits[i+1]+digits[i+2]+digits[i+3];
+      if(!isRepeat(v)) p4[v]=(p4[v]||0)+1;
+    }
+
+    // 5 ตัว
     if(i<=digits.length-5){
       let v=digits.slice(i,i+5).join("");
       if(!isRepeat(v)) p5[v]=(p5[v]||0)+1;
     }
 
+    // 6 ตัว
     if(i<=digits.length-6){
       let v=digits.slice(i,i+6).join("");
       if(!isRepeat(v)) p6[v]=(p6[v]||0)+1;
     }
   }
 
-  // save
   saveStat(digits);
 
   let text="🔥 เลขเด่น:\n"+top.join(" ")+"\n\n";
 
   text+="📌 2 ตัว:\n"+topN(p2,8).join(" • ")+"\n\n";
   text+="📌 3 ตัว:\n"+topN(p3,6).join(" • ")+"\n\n";
+  text+="📌 4 ตัว:\n"+topN(p4,5).join(" • ")+"\n\n";
   text+="📌 5 ตัว:\n"+topN(p5,5).join(" • ")+"\n\n";
   text+="📌 6 ตัว:\n"+topN(p6,3).join(" • ");
 
