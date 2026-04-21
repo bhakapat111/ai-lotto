@@ -1,102 +1,34 @@
 <script>
 
-// 🔥 กรองเลขเบิ้ล
-function isRepeat(num){
-  return /^(\d)\1+$/.test(num);
+// 📅 แสดงวันที่อัตโนมัติ (ไทย)
+function autoToday(){
+
+  const d = new Date();
+
+  const days = [
+    "อาทิตย์","จันทร์","อังคาร",
+    "พุธ","พฤหัส","ศุกร์","เสาร์"
+  ];
+
+  const months = [
+    "มกราคม","กุมภาพันธ์","มีนาคม","เมษายน",
+    "พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม",
+    "กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"
+  ];
+
+  let dayName = days[d.getDay()];
+  let day = d.getDate();
+  let month = months[d.getMonth()];
+  let year = d.getFullYear() + 543;
+
+  let text = "วัน" + dayName + " ที่ " + day + " เดือน " + month + " พ.ศ. " + year;
+
+  document.getElementById("today").innerText = text;
 }
 
-// 🔥 top
-function topN(obj,n){
-  return Object.entries(obj)
-  .sort((a,b)=>b[1]-a[1])
-  .map(x=>x[0])
-  .filter(x=>!isRepeat(x))
-  .slice(0,n);
-}
-
-// 📊 เก็บสถิติ
-let historyData = JSON.parse(localStorage.getItem("lotto_stat") || "[]");
-
-// 🔄 ล้างสถิติ
-function clearStat(){
-  localStorage.removeItem("lotto_stat");
-  historyData = [];
-  document.getElementById("detail").innerText = "ล้างข้อมูลแล้ว";
-}
-
-// 🤖 วิเคราะห์
-function analyze(){
-
-  let input = document.getElementById("input").value;
-
-  let lines = input.split("\n").filter(x=>x.trim()!="");
-
-  let numbers=[];
-
-  for(let l of lines){
-    let match = l.match(/\d{6}/);
-    if(match) numbers.push(match[0]);
-  }
-
-  // 👉 เก็บลงสถิติ
-  historyData = historyData.concat(numbers);
-  localStorage.setItem("lotto_stat", JSON.stringify(historyData));
-
-  let digits=[];
-
-  for(let n of historyData){
-    for(let d of n){
-      digits.push(d);
-    }
-  }
-
-  // 🔥 นับเลข
-  let counter={};
-  for(let d of digits){
-    counter[d]=(counter[d]||0)+1;
-  }
-
-  let top = topN(counter,3);
-
-  // 📌 เจาะ
-  let p3={},p4={},p5={},p6={};
-
-  for(let n of historyData){
-
-    for(let i=0;i<n.length;i++){
-
-      if(i<=n.length-3){
-        let s=n.substring(i,i+3);
-        p3[s]=(p3[s]||0)+1;
-      }
-
-      if(i<=n.length-4){
-        let s=n.substring(i,i+4);
-        p4[s]=(p4[s]||0)+1;
-      }
-
-      if(i<=n.length-5){
-        let s=n.substring(i,i+5);
-        p5[s]=(p5[s]||0)+1;
-      }
-
-      if(i<=n.length-6){
-        let s=n.substring(i,i+6);
-        p6[s]=(p6[s]||0)+1;
-      }
-
-    }
-  }
-
-  let text="🔥 เลขเด่น:\n";
-  text+=top.join(" ")+"\n\n";
-
-  text+="📌 3 ตัว:\n"+topN(p3,6).join(" • ")+"\n\n";
-  text+="📌 4 ตัว:\n"+topN(p4,5).join(" • ")+"\n\n";
-  text+="📌 5 ตัว:\n"+topN(p5,4).join(" • ")+"\n\n";
-  text+="📌 6 ตัว:\n"+topN(p6,3).join(" • ")+"\n\n";
-
-  document.getElementById("detail").innerText=text;
+// 🔥 เรียกใช้ตอนเปิดเว็บ
+window.onload = function(){
+  autoToday();
 }
 
 </script>
