@@ -1,117 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI ระบบคำนวณ</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial;
+      background:#eef2f7;
+      text-align:center;
+      padding:20px;
+    }
+
+    .box {
+      background:white;
+      padding:20px;
+      width:520px;
+      margin:auto;
+      border-radius:12px;
+      box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    textarea {
+      width:100%;
+      padding:10px;
+      margin-top:10px;
+      height:150px;
+    }
+
+    button {
+      margin-top:10px;
+      width:100%;
+      padding:10px;
+      background:#007bff;
+      color:white;
+      border:none;
+      border-radius:6px;
+    }
+
+    .reset-btn {
+      background:#dc3545;
+    }
+
+    .detail {
+      margin-top:15px;
+      text-align:left;
+      background:#f7f7f7;
+      padding:10px;
+      border-radius:8px;
+      white-space:pre-line;
+      font-size:14px;
+    }
+
+    .date {
+      font-size:18px;
+      margin-bottom:10px;
+    }
+
+    @media (max-width:600px){
+      .box{width:95%;}
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>สูตรคำนวณ AI</h2>
+
+<div class="date" id="today"></div>
+
+<textarea id="input" placeholder="ใส่ข้อมูล เช่น:
+16/6/2566 363820 ลาวพัฒนา
+17/6/2566 389299 ลาวพัฒนา"></textarea>
+
+<button onclick="analyze()">วิเคราะห์</button>
+<button class="reset-btn" onclick="resetAll()">🔄 Reset ทั้งหมด</button>
+
+<div id="detail" class="detail"></div>
+
+</div>
+
+<script>
+
+// 📅 วันที่ไทย
+function showToday(){
+  const d = new Date();
+  const days = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
+  const months = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+
+  let text = "วัน"+days[d.getDay()]+" ที่ "+d.getDate()+" เดือน "+months[d.getMonth()]+" พ.ศ. "+(d.getFullYear()+543);
+  document.getElementById("today").innerText = text;
+}
+showToday();
 
 // ❌ กรองเลขเบิ้ล
 function isRepeat(num){
   return /^(\d)\1+$/.test(num);
 }
 
-// 🔥 เรียง top
+// 📊 save
+function saveStat(data){
+  let old = JSON.parse(localStorage.getItem("lottoStat") || "[]");
+  old.push(...data);
+  localStorage.setItem("lottoStat", JSON.stringify(old));
+}
+
+// 📊 load
+function loadStat(){
+  return JSON.parse(localStorage.getItem("lottoStat") || "[]");
+}
+
+// 🔥 top
 function topN(obj,n){
   return Object.entries(obj)
     .sort((a,b)=>b[1]-a[1])
     .map(x=>x[0])
+    .filter(x=>!isRepeat(x))
     .slice(0,n);
 }
 
-// 📊 สร้าง pattern 3/4/5/6 ตัว
-function buildPatterns(numbers){
+// 🤖 analyze
+function analyze(){
 
-  let p3={}, p4={}, p5={}, p6={};
+  let input = document.getElementById("input").value;
 
-  for(let n of numbers){
+  if(!input.trim()){
+    alert("กรอกข้อมูลก่อน");
+    return;
+  }
 
-    for(let i=0;i<n.length;i++){
+  let numbers = input.match(/\d+/g);
 
-      if(i<=n.length-3){
-        let s=n.substring(i,i+3);
-        if(!isRepeat(s))
-          p3[s]=(p3[s]||0)+1;
-      }
+  if(!numbers){
+    alert("ไม่พบตัวเลข");
+    return;
+  }
 
-      if(i<=n.length-4){
-        let s=n.substring(i,i+4);
-        if(!isRepeat(s))
-          p4[s]=(p4[s]||0)+1;
-      }
+  let digits=[];
 
-      if(i<=n.length-5){
-        let s=n.substring(i,i+5);
-        if(!isRepeat(s))
-          p5[s]=(p5[s]||0)+1;
-      }
+  numbers.forEach(n=>{
+    for(let c of n){
+      digits.push(c);
+    }
+  });
 
-      if(i<=n.length-6){
-        let s=n.substring(i,i+6);
-        if(!isRepeat(s))
-          p6[s]=(p6[s]||0)+1;
-      }
+  // รวมสถิติเดิม
+  let old = loadStat();
+  digits = digits.concat(old);
 
+  let counter={};
+  digits.forEach(d=>{
+    counter[d]=(counter[d]||0)+1;
+  });
+
+  let top = topN(counter,3);
+
+  let p3={},p4={},p5={},p6={};
+
+  for(let i=0;i<digits.length;i++){
+
+    if(i <= digits.length - 3){
+  let v = digits[i] + digits[i+1] + digits[i+2];
+  if(!isRepeat(v))
+    p3[v] = (p3[v] || 0) + 1;
+}
+
+if(i <= digits.length - 4){
+  let v = digits[i] + digits[i+1] + digits[i+2] + digits[i+3];
+  if(!isRepeat(v))
+    p4[v] = (p4[v] || 0) + 1;
+}
+
+    if(i<=digits.length-5){
+      let v=digits.slice(i,i+5).join("");
+      if(!isRepeat(v)) p5[v]=(p5[v]||0)+1;
+    }
+
+    if(i<=digits.length-6){
+      let v=digits.slice(i,i+6).join("");
+      if(!isRepeat(v)) p6[v]=(p6[v]||0)+1;
     }
   }
 
-  return {p3,p4,p5,p6};
+  // save
+  saveStat(digits);
+
+  let text="🔥 เลขเด่น:\n"+top.join(" ")+"\n\n";
+
+  text+="📌 3 ตัว:\n"+topN(p3,6).join(" • ")+"\n\n";
+  text+="📌 4 ตัว:\n"+topN(p4,5).join(" • ")+"\n\n";
+  text+="📌 5 ตัว:\n"+topN(p5,5).join(" • ")+"\n\n";
+  text+="📌 6 ตัว:\n"+topN(p6,3).join(" • ");
+
+  document.getElementById("detail").innerText=text;
 }
 
-// 📊 บันทึกสถิติ
-function saveStat(numbers){
-  let old = JSON.parse(localStorage.getItem("lottoStat") || "[]");
-  old = old.concat(numbers);
-  localStorage.setItem("lottoStat", JSON.stringify(old));
+// 🔄 reset
+function resetAll(){
+  if(confirm("ล้างข้อมูลทั้งหมด?")){
+    document.getElementById("input").value="";
+    document.getElementById("detail").innerText="";
+    localStorage.removeItem("lottoStat");
+    alert("ล้างเรียบร้อย");
+  }
 }
 
-// 📊 โหลด + วิเคราะห์
-function loadStat(){
+</script>
 
-  let data = JSON.parse(localStorage.getItem("lottoStat") || "[]");
-
-  let patterns = buildPatterns(data);
-
-  return {
-    raw: data,
-    p3: patterns.p3,
-    p4: patterns.p4,
-    p5: patterns.p5,
-    p6: patterns.p6
-  };
-}
-
-// 🔄 ล้างสถิติ
-function clearStat(){
-  localStorage.removeItem("lottoStat");
-}
-
-// 🤖 ใช้งานจริง (เรียกใน analyze)
-function runAI(numbers){
-
-  // บันทึก
-  saveStat(numbers);
-
-  // โหลด
-  let stat = loadStat();
-
-  // เอา top
-  let result = {
-    top3: topN(stat.p3,6),
-    top4: topN(stat.p4,5),
-    top5: topN(stat.p5,4),
-    top6: topN(stat.p6,3)
-  };
-
-  return result;
-}
-
-
-/* =========================
-   🔥 ตัวอย่างเรียกใช้งาน
-========================= */
-
-// สมมุติ input
-let numbers = ["363820","389299"];
-
-// รัน AI
-let ai = runAI(numbers);
-
-// แสดงผล
-console.log("3 ตัว:", ai.top3.join(" • "));
-console.log("4 ตัว:", ai.top4.join(" • "));
-console.log("5 ตัว:", ai.top5.join(" • "));
-console.log("6 ตัว:", ai.top6.join(" • "));
+</body>
+</html>
