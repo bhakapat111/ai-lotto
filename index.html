@@ -7,7 +7,7 @@
   <style>
     body {
       font-family: Arial;
-      background: linear-gradient(135deg,#4facfe,#00f2fe);
+      background:#eef2f7;
       text-align:center;
       padding:20px;
     }
@@ -17,15 +17,15 @@
       padding:20px;
       width:520px;
       margin:auto;
-      border-radius:16px;
-      box-shadow:0 10px 25px rgba(0,0,0,0.15);
+      border-radius:12px;
+      box-shadow:0 5px 15px rgba(0,0,0,0.1);
     }
 
     textarea, select {
       width:100%;
       padding:10px;
       margin-top:10px;
-      border-radius:8px;
+      border-radius:6px;
       border:1px solid #ddd;
     }
 
@@ -36,18 +36,19 @@
       background:#007bff;
       color:white;
       border:none;
-      border-radius:8px;
-      font-weight:bold;
+      border-radius:6px;
     }
 
-    .reset-btn { background:#dc3545; }
+    .reset-btn {
+      background:#dc3545;
+    }
 
     .detail {
       margin-top:15px;
       text-align:left;
       background:#f7f7f7;
       padding:10px;
-      border-radius:10px;
+      border-radius:8px;
       white-space:pre-line;
       font-size:14px;
     }
@@ -56,6 +57,10 @@
       font-size:16px;
       margin-bottom:10px;
     }
+
+    @media (max-width:600px){
+      .box{width:95%;}
+    }
   </style>
 </head>
 
@@ -63,9 +68,9 @@
 
 <div class="box">
 
-<h2>🤖 AI วิเคราะห์เลข</h2>
+<h2>สูตรคำนวณ AI</h2>
 
-<!-- ✅ ประเภทหวย (ครบทั้งหมด + เพิ่มแล้ว) -->
+<!-- 🔥 ของเดิม (ครบ + เพิ่มแล้ว) -->
 <select id="type">
   <optgroup label="🇹🇭 หวยไทย">
     <option value="gov">รัฐบาล</option>
@@ -109,7 +114,7 @@
   </optgroup>
 </select>
 
-<!-- ✅ เวลา -->
+<!-- 🔥 เพิ่ม: เลือกเวลา -->
 <select id="time">
   <option value="morning">🌅 เช้า</option>
   <option value="afternoon">☀️ บ่าย</option>
@@ -123,7 +128,7 @@
 17/6/2566 389299"></textarea>
 
 <button onclick="analyze()">วิเคราะห์</button>
-<button class="reset-btn" onclick="resetAll()">ล้างทั้งหมด</button>
+<button class="reset-btn" onclick="resetAll()">🔄 Reset ทั้งหมด</button>
 
 <div id="detail" class="detail"></div>
 
@@ -134,7 +139,8 @@
 // 📅 วันที่
 function showToday(){
   const d = new Date();
-  document.getElementById("today").innerText = d.toLocaleDateString("th-TH");
+  document.getElementById("today").innerText =
+    d.toLocaleDateString("th-TH",{dateStyle:"full"});
 }
 showToday();
 
@@ -143,7 +149,7 @@ function isRepeat(num){
   return /^(\d)\1+$/.test(num);
 }
 
-// 🔑 key = type + time
+// 🔑 key แยก (ฉลาด)
 function getKey(){
   return "lotto_"+type.value+"_"+time.value;
 }
@@ -156,7 +162,7 @@ function autoTime(){
   else time.value="evening";
 }
 
-// 🤖 auto ประเภท
+// 🤖 auto หวย (ง่าย ๆ)
 function autoType(){
   let d = new Date().getDay();
   if(d==1||d==4) type.value="gov";
@@ -235,10 +241,7 @@ function analyze(){
 
   localStorage.setItem(getKey(), JSON.stringify(digits));
 
-  let typeName = type.selectedOptions[0].text;
-  let timeName = time.selectedOptions[0].text;
-
-  let text = "📊 "+typeName+" | "+timeName+"\n\n";
+  let text = "📊 "+type.selectedOptions[0].text+" | "+time.selectedOptions[0].text+"\n\n";
 
   text += "🔥 เลขเด่น:\n"+topN(count,3).map(x=>x[0]).join(" ")+"\n\n";
   text += "📌 3 ตัว:\n"+topN(p3,6).map(x=>x[0]).join(" • ")+"\n\n";
@@ -251,7 +254,7 @@ function analyze(){
 
 // 🔄 reset
 function resetAll(){
-  if(confirm("ล้างทั้งหมด?")){
+  if(confirm("ล้างข้อมูลทั้งหมด?")){
     localStorage.clear();
     location.reload();
   }
