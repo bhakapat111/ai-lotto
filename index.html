@@ -1,12 +1,25 @@
-// ❌ เลขเบิ้ลแท้ (111, 2222)
+<script>
+
+// 📅 วันที่ไทย
+function showToday(){
+  const d = new Date();
+  const days = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
+  const months = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+
+  let text = "วัน"+days[d.getDay()]+" ที่ "+d.getDate()+" เดือน "+months[d.getMonth()]+" พ.ศ. "+(d.getFullYear()+543);
+  document.getElementById("today").innerText = text;
+}
+showToday();
+
+// ❌ กรองเลขเบิ้ล
 function isRepeat(num){
   return /^(\d)\1+$/.test(num);
 }
 
-// 📊 save (เก็บเป็นรอบ ไม่แตก digit)
+// 📊 save
 function saveStat(data){
   let old = JSON.parse(localStorage.getItem("lottoStat") || "[]");
-  old.push(data.join(""));
+  old.push(...data);
   localStorage.setItem("lottoStat", JSON.stringify(old));
 }
 
@@ -24,7 +37,7 @@ function topN(obj,n){
     .slice(0,n);
 }
 
-// 🤖 analyze (แก้ให้ถูก)
+// 🤖 analyze
 function analyze(){
 
   let input = document.getElementById("input").value;
@@ -35,18 +48,25 @@ function analyze(){
   }
 
   let numbers = input.match(/\d+/g);
+
   if(!numbers){
     alert("ไม่พบตัวเลข");
     return;
   }
 
-  let digits = [];
+  let digits=[];
+
   numbers.forEach(n=>{
-    digits.push(...n.split(""));
+    for(let c of n){
+      digits.push(c);
+    }
   });
 
-  // 📊 วิเคราะห์
-  let counter = {};
+  // รวมสถิติเดิม
+  let old = loadStat();
+  digits = digits.concat(old);
+
+  let counter={};
   digits.forEach(d=>{
     counter[d]=(counter[d]||0)+1;
   });
@@ -58,34 +78,47 @@ function analyze(){
   for(let i=0;i<digits.length;i++){
 
     if(i<=digits.length-3){
-      let v = digits[i]+digits[i+1]+digits[i+2];
+      let v=digits[i]+digits[i+1]+digits[i+2];
       if(!isRepeat(v)) p3[v]=(p3[v]||0)+1;
     }
 
     if(i<=digits.length-4){
-      let v = digits[i]+digits[i+1]+digits[i+2]+digits[i+3];
+      let v=digits.slice(i,i+4).join("");
       if(!isRepeat(v)) p4[v]=(p4[v]||0)+1;
     }
 
     if(i<=digits.length-5){
-      let v = digits.slice(i,i+5).join("");
+      let v=digits.slice(i,i+5).join("");
       if(!isRepeat(v)) p5[v]=(p5[v]||0)+1;
     }
 
     if(i<=digits.length-6){
-      let v = digits.slice(i,i+6).join("");
+      let v=digits.slice(i,i+6).join("");
       if(!isRepeat(v)) p6[v]=(p6[v]||0)+1;
     }
   }
 
-  // save รอบล่าสุด (ถูกต้องกว่าเดิม)
+  // save
   saveStat(digits);
 
   let text="🔥 เลขเด่น:\n"+top.join(" ")+"\n\n";
+
   text+="📌 3 ตัว:\n"+topN(p3,6).join(" • ")+"\n\n";
-  text+="📌 4 ตัว:\n"+topN(p4,5).join(" • ")+"\n\n";
+  text+="📌 4 ตัว:\n"+topN(p4,6).join(" • ")+"\n\n";
   text+="📌 5 ตัว:\n"+topN(p5,5).join(" • ")+"\n\n";
   text+="📌 6 ตัว:\n"+topN(p6,3).join(" • ");
 
   document.getElementById("detail").innerText=text;
 }
+
+// 🔄 reset
+function resetAll(){
+  if(confirm("ล้างข้อมูลทั้งหมด?")){
+    document.getElementById("input").value="";
+    document.getElementById("detail").innerText="";
+    localStorage.removeItem("lottoStat");
+    alert("ล้างเรียบร้อย");
+  }
+}
+
+</script>
