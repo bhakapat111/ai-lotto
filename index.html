@@ -2,7 +2,6 @@
 <html>
 <head>
   <title>AI ระบบคำนวณ</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
@@ -58,6 +57,12 @@
       margin-bottom:10px;
     }
 
+    select {
+      width:100%;
+      padding:8px;
+      margin-bottom:10px;
+    }
+
     @media (max-width:600px){
       .box{width:95%;}
     }
@@ -71,7 +76,6 @@
 <h2>สูตรคำนวณ AI</h2>
 
 <select id="type">
-
   <optgroup label="🇹🇭 หวยไทย">
     <option value="gov">รัฐบาล</option>
     <option value="baac">ธกส.</option>
@@ -100,7 +104,6 @@
     <option value="hantv">ฮานอย TV</option>
     <option value="hanhd">ฮานอย HD</option>
   </optgroup>
-
 </select>
 
 <div class="date" id="today"></div>
@@ -118,29 +121,28 @@
 
 <script>
 
-// 📅 วันที่ไทย
+// วันที่
 function showToday(){
   const d = new Date();
   const days = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
   const months = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
-
   let text = "วัน"+days[d.getDay()]+" ที่ "+d.getDate()+" เดือน "+months[d.getMonth()]+" พ.ศ. "+(d.getFullYear()+543);
   document.getElementById("today").innerText = text;
 }
 showToday();
 
-// ❌ กรองเลขเบิ้ล
+// กรองเลขเบิ้ล
 function isRepeat(num){
   return /^(\d)\1+$/.test(num);
 }
 
-// 🔑 key แยกประเภท
+// key แยกประเภท
 function getKey(){
   let t = document.getElementById("type").value;
   return "lottoStat_"+t;
 }
 
-// 📊 save
+// save
 function saveStat(data){
   let key = getKey();
   let old = JSON.parse(localStorage.getItem(key) || "[]");
@@ -148,13 +150,13 @@ function saveStat(data){
   localStorage.setItem(key, JSON.stringify(old));
 }
 
-// 📊 load
+// load
 function loadStat(){
   let key = getKey();
   return JSON.parse(localStorage.getItem(key) || "[]");
 }
 
-// 🔥 top
+// top
 function topN(obj,n){
   return Object.entries(obj)
     .sort((a,b)=>b[1]-a[1])
@@ -163,29 +165,24 @@ function topN(obj,n){
     .slice(0,n);
 }
 
-// 🤖 analyze
+// วิเคราะห์
 function analyze(){
 
   let input = document.getElementById("input").value;
-
   if(!input.trim()){
     alert("กรอกข้อมูลก่อน");
     return;
   }
 
   let numbers = input.match(/\d+/g);
-
   if(!numbers){
     alert("ไม่พบตัวเลข");
     return;
   }
 
   let digits=[];
-
   numbers.forEach(n=>{
-    for(let c of n){
-      digits.push(c);
-    }
+    for(let c of n){ digits.push(c); }
   });
 
   let old = loadStat();
@@ -226,7 +223,6 @@ function analyze(){
   saveStat(digits);
 
   let text="🔥 เลขเด่น:\n"+top.join(" ")+"\n\n";
-
   text+="📌 3 ตัว:\n"+topN(p3,6).join(" • ")+"\n\n";
   text+="📌 4 ตัว:\n"+topN(p4,6).join(" • ")+"\n\n";
   text+="📌 5 ตัว:\n"+topN(p5,5).join(" • ")+"\n\n";
@@ -235,7 +231,7 @@ function analyze(){
   document.getElementById("detail").innerText=text;
 }
 
-// 🔄 reset
+// reset
 function resetAll(){
   if(confirm("ล้างข้อมูลทั้งหมด?")){
     document.getElementById("input").value="";
