@@ -1,34 +1,117 @@
-<script>
 
-// 📅 แสดงวันที่อัตโนมัติ (ไทย)
-function autoToday(){
-
-  const d = new Date();
-
-  const days = [
-    "อาทิตย์","จันทร์","อังคาร",
-    "พุธ","พฤหัส","ศุกร์","เสาร์"
-  ];
-
-  const months = [
-    "มกราคม","กุมภาพันธ์","มีนาคม","เมษายน",
-    "พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม",
-    "กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"
-  ];
-
-  let dayName = days[d.getDay()];
-  let day = d.getDate();
-  let month = months[d.getMonth()];
-  let year = d.getFullYear() + 543;
-
-  let text = "วัน" + dayName + " ที่ " + day + " เดือน " + month + " พ.ศ. " + year;
-
-  document.getElementById("today").innerText = text;
+// ❌ กรองเลขเบิ้ล
+function isRepeat(num){
+  return /^(\d)\1+$/.test(num);
 }
 
-// 🔥 เรียกใช้ตอนเปิดเว็บ
-window.onload = function(){
-  autoToday();
+// 🔥 เรียง top
+function topN(obj,n){
+  return Object.entries(obj)
+    .sort((a,b)=>b[1]-a[1])
+    .map(x=>x[0])
+    .slice(0,n);
 }
 
-</script>
+// 📊 สร้าง pattern 3/4/5/6 ตัว
+function buildPatterns(numbers){
+
+  let p3={}, p4={}, p5={}, p6={};
+
+  for(let n of numbers){
+
+    for(let i=0;i<n.length;i++){
+
+      if(i<=n.length-3){
+        let s=n.substring(i,i+3);
+        if(!isRepeat(s))
+          p3[s]=(p3[s]||0)+1;
+      }
+
+      if(i<=n.length-4){
+        let s=n.substring(i,i+4);
+        if(!isRepeat(s))
+          p4[s]=(p4[s]||0)+1;
+      }
+
+      if(i<=n.length-5){
+        let s=n.substring(i,i+5);
+        if(!isRepeat(s))
+          p5[s]=(p5[s]||0)+1;
+      }
+
+      if(i<=n.length-6){
+        let s=n.substring(i,i+6);
+        if(!isRepeat(s))
+          p6[s]=(p6[s]||0)+1;
+      }
+
+    }
+  }
+
+  return {p3,p4,p5,p6};
+}
+
+// 📊 บันทึกสถิติ
+function saveStat(numbers){
+  let old = JSON.parse(localStorage.getItem("lottoStat") || "[]");
+  old = old.concat(numbers);
+  localStorage.setItem("lottoStat", JSON.stringify(old));
+}
+
+// 📊 โหลด + วิเคราะห์
+function loadStat(){
+
+  let data = JSON.parse(localStorage.getItem("lottoStat") || "[]");
+
+  let patterns = buildPatterns(data);
+
+  return {
+    raw: data,
+    p3: patterns.p3,
+    p4: patterns.p4,
+    p5: patterns.p5,
+    p6: patterns.p6
+  };
+}
+
+// 🔄 ล้างสถิติ
+function clearStat(){
+  localStorage.removeItem("lottoStat");
+}
+
+// 🤖 ใช้งานจริง (เรียกใน analyze)
+function runAI(numbers){
+
+  // บันทึก
+  saveStat(numbers);
+
+  // โหลด
+  let stat = loadStat();
+
+  // เอา top
+  let result = {
+    top3: topN(stat.p3,6),
+    top4: topN(stat.p4,5),
+    top5: topN(stat.p5,4),
+    top6: topN(stat.p6,3)
+  };
+
+  return result;
+}
+
+
+/* =========================
+   🔥 ตัวอย่างเรียกใช้งาน
+========================= */
+
+// สมมุติ input
+let numbers = ["363820","389299"];
+
+// รัน AI
+let ai = runAI(numbers);
+
+// แสดงผล
+console.log("3 ตัว:", ai.top3.join(" • "));
+console.log("4 ตัว:", ai.top4.join(" • "));
+console.log("5 ตัว:", ai.top5.join(" • "));
+console.log("6 ตัว:", ai.top6.join(" • "));
